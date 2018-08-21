@@ -1,6 +1,7 @@
 package com.example.myweather;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,7 +21,6 @@ import com.example.myweather.db.County;
 import com.example.myweather.db.Province;
 import com.example.myweather.util.HttpUtil;
 import com.example.myweather.util.LogUtil;
-import com.example.myweather.util.MyApplication;
 import com.example.myweather.util.RegionParseUtil;
 
 import org.litepal.crud.DataSupport;
@@ -52,6 +52,8 @@ public class ChooseAreaFragment extends Fragment {
     private City selectedCity;
     //所有的县列表
     private List<County> allCounty;
+    //被选中的county
+    private County selectedcounty;
     //当前列表状态
     private int currentType = 0;
     private static final int TYPE_PROVINCE = 1;
@@ -87,6 +89,13 @@ public class ChooseAreaFragment extends Fragment {
                         queryCounty();
                         break;
                     case TYPE_COUNTY :
+                        selectedcounty = allCounty.get(i);
+                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                        intent.putExtra("province",selectedProvince.getProvinceName());
+                        intent.putExtra("city",selectedCity.getCityName());
+                        intent.putExtra("county",selectedcounty.getCountyName());
+                        startActivity(intent);
+                        getActivity().finish();
                         break;
                     default:
                 }
@@ -236,4 +245,5 @@ public class ChooseAreaFragment extends Fragment {
             progressDialog.dismiss();
         }
     }
+
 }
