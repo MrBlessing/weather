@@ -22,4 +22,15 @@
         android:textColor="#fff"
         android:textSize="20sp"/>
 
+
+    <TextView
+        android:id="@+id/now_updateTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="10dp"
+        android:textColor="#fff"/>
+
+
 </LinearLayout>

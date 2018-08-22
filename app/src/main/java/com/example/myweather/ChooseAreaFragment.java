@@ -90,12 +90,18 @@ public class ChooseAreaFragment extends Fragment {
                         break;
                     case TYPE_COUNTY :
                         selectedcounty = allCounty.get(i);
-                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
-                        intent.putExtra("province",selectedProvince.getProvinceName());
-                        intent.putExtra("city",selectedCity.getCityName());
-                        intent.putExtra("county",selectedcounty.getCountyName());
-                        startActivity(intent);
-                        getActivity().finish();
+                        if(getActivity() instanceof MainActivity){
+                            Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                            intent.putExtra("county",selectedcounty.getCountyName());
+                            startActivity(intent);
+                            getActivity().finish();
+                        }
+                        if(getActivity() instanceof WeatherActivity){
+                            WeatherActivity weatherActivity = (WeatherActivity) getActivity();
+                            weatherActivity.drawerLayout.closeDrawers();
+                            weatherActivity.requestWeather(selectedcounty.getCountyName());
+                            weatherActivity.refreshLayout.setRefreshing(true);
+                        }
                         break;
                     default:
                 }

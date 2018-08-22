@@ -3,23 +3,66 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary">
-    <ScrollView
-        android:id="@+id/weather_scrollView"
+
+    <ImageView
+        android:id="@+id/weather_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none"
-        android:overScrollMode="never">
+        android:scaleType="centerCrop"/>
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/weather_drawLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/weather_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ScrollView
+                android:id="@+id/weather_scrollView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:overScrollMode="never"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fitsSystemWindows="true"
+                    android:orientation="vertical">
+
+                    <include layout="@layout/weather_title" />
+
+                    <include layout="@layout/weather_now" />
+
+                    <include layout="@layout/weather_forecast" />
+
+                    <include layout="@layout/weather_aqi" />
+
+                    <include layout="@layout/weather_suggest" />
+                </LinearLayout>
+
+            </ScrollView>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <LinearLayout
+            android:layout_gravity="start"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
+            <fragment
+                android:id="@+id/weather_choose_area"
+                android:name="com.example.myweather.ChooseAreaFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp"/>
 
-            <include layout="@layout/weather_title"/>
-            <include layout="@layout/weather_now"/>
-            <include layout="@layout/weather_forecast"/>
         </LinearLayout>
 
-    </ScrollView>
+
+    </android.support.v4.widget.DrawerLayout>
+
 
 </FrameLayout>
