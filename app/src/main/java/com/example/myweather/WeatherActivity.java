@@ -22,6 +22,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.location.BDAbstractLocationListener;
+import com.baidu.location.BDLocation;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 import com.bumptech.glide.Glide;
 import com.example.myweather.gson.AirQualityBean;
 import com.example.myweather.gson.FutureBean;
@@ -55,6 +59,7 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView exerciseIndex;
     private ImageView background;
     private Button titleNva;
+    private Button titlePosition;
     public DrawerLayout drawerLayout;
     private String updateTime;
     public SwipeRefreshLayout refreshLayout;
@@ -78,6 +83,39 @@ public class WeatherActivity extends AppCompatActivity {
         loadRefreshEvent();
         //设置侧滑栏事件
         setNav();
+        //自动定位
+        autoPosition();
+    }
+
+    private void autoPosition() {
+
+        titlePosition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LocationClient client = new LocationClient(WeatherActivity.this);
+                LocationClientOption option = new LocationClientOption();
+                option.setIsNeedAddress(true);
+                client.setLocOption(option);
+                client.registerLocationListener(new BDAbstractLocationListener() {
+                    @Override
+                    public void onReceiveLocation(BDLocation bdLocation) {
+                        String county = null;
+                        if(bdLocation.getDistrict().contains("县")){
+                            county= bdLocation.getDistrict().split("县")[0];
+                        }
+                        if(bdLocation.getDistrict().contains("区")){
+                            county= bdLocation.getDistrict().split("区")[0];
+                        }
+                            refreshLayout.setRefreshing(true);
+                            Toast.makeText(WeatherActivity.this, "正在定位当前城市", Toast.LENGTH_SHORT).show();
+                            LogUtil.d(TAG,"county:"+county);
+                            requestWeather(county);
+                            client.stop();
+                    }
+                });
+                client.start();
+            }
+        });
     }
 
     private void setNav() {
@@ -110,7 +148,9 @@ public class WeatherActivity extends AppCompatActivity {
             currentCounty = weather.getResult().get(0).getCity();
             showWeatherInfo(weather);
         }else {
-            autoPosition();
+            Intent intent = getIntent();
+            currentCounty = intent.getStringExtra("county");
+            requestWeather(currentCounty);
         }
     }
 
@@ -146,15 +186,6 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
 
-    private void autoPosition() {
-        artificialPosition();
-    }
-
-    private void artificialPosition() {
-        Intent intent = getIntent();
-        currentCounty = intent.getStringExtra("county");
-        requestWeather(currentCounty);
-    }
 
     public void requestWeather( String county) {
         HttpUtil.sendOkHttpRequest("http://apicloud.mob.com/v1/weather/query?key=20588bd8fbea0&city=" + county , new Callback() {
@@ -226,11 +257,8 @@ public class WeatherActivity extends AppCompatActivity {
 
         //show future forecast
         forecastFuture.removeAllViews();
-        String now = new SimpleDateFormat("y-MM-dd").format(System.currentTimeMillis()).split("-")[2];
-        for(FutureBean temp : future) {
-            if (Integer.parseInt(temp.getDate().split("-")[2]) <= Integer.parseInt(now) ) {
-                continue;
-            }
+        for(int i =1 ; i < future.size() ; i++) {
+            FutureBean temp = future.get(i);
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item, forecastFuture, false);
             TextView dateFuture = view.findViewById(R.id.item_date);
             TextView weatherFuture = view.findViewById(R.id.item_weather);
@@ -270,6 +298,7 @@ public class WeatherActivity extends AppCompatActivity {
         refreshLayout = findViewById(R.id.weather_refresh);
         titleNva = findViewById(R.id.title_nav);
         drawerLayout = findViewById(R.id.weather_drawLayout);
+        titlePosition = findViewById(R.id.title_position);
     }
 
 }
