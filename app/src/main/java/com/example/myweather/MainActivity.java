@@ -58,20 +58,26 @@ public class MainActivity extends AppCompatActivity {
         client.registerLocationListener(new BDAbstractLocationListener() {
             @Override
             public void onReceiveLocation(BDLocation bdLocation) {
-                String county =null;
-                //百度定位中含有县或者区字样，这样的数据无法查询
-                if(bdLocation.getDistrict().contains("县")){
-                     county= bdLocation.getDistrict().split("县")[0];
+                String county = null;
+                if (bdLocation.getDistrict().contains("县")) {
+                    county = bdLocation.getDistrict().split("县")[0];
+                } else if (bdLocation.getDistrict().contains("区")) {
+                    county = bdLocation.getDistrict().split("区")[0];
+                } else {
+                    Toast.makeText(MainActivity.this, "本软件暂时无法定位当前地区", Toast.LENGTH_SHORT).show();
                 }
-                if(bdLocation.getDistrict().contains("区")){
-                    county= bdLocation.getDistrict().split("区")[0];
+                LogUtil.d(TAG, "county :" + county);
+                if (bdLocation.getDistrict().contains("市辖")) {
+                    county = null;
+                    Toast.makeText(MainActivity.this, "本软件暂时无法定位当前地区", Toast.LENGTH_SHORT).show();
                 }
-                LogUtil.d(TAG,"county :" + county);
-                Intent intent = new Intent(MainActivity.this,WeatherActivity.class);
-                intent.putExtra("county",county);
-                startActivity(intent);
-                MainActivity.this.finish();
-
+                if (county != null) {
+                    Intent intent = new Intent(MainActivity.this, WeatherActivity.class);
+                    intent.putExtra("county", county);
+                    startActivity(intent);
+                    MainActivity.this.finish();
+                }
+                client.stop();
             }
         });
         client.start();

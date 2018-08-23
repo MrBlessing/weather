@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:textColor="#fff"
-        android:textSize="60sp"/>
+        android:textSize="40sp"/>
 
     <TextView
         android:id="@+id/now_info"

@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -64,6 +65,7 @@ public class WeatherActivity extends AppCompatActivity {
     private String updateTime;
     public SwipeRefreshLayout refreshLayout;
     private String currentCounty;
+    private long exitTime = 0;
     private static final String TAG = "WeatherActivity";
 
     @Override
@@ -92,6 +94,9 @@ public class WeatherActivity extends AppCompatActivity {
         titlePosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Toast.makeText(WeatherActivity.this, "正在定位", Toast.LENGTH_SHORT).show();
+                refreshLayout.setRefreshing(true);
+
                 LocationClient client = new LocationClient(WeatherActivity.this);
                 LocationClientOption option = new LocationClientOption();
                 option.setIsNeedAddress(true);
@@ -102,15 +107,24 @@ public class WeatherActivity extends AppCompatActivity {
                         String county = null;
                         if(bdLocation.getDistrict().contains("县")){
                             county= bdLocation.getDistrict().split("县")[0];
-                        }
-                        if(bdLocation.getDistrict().contains("区")){
+                        }else if(bdLocation.getDistrict().contains("区")){
                             county= bdLocation.getDistrict().split("区")[0];
+                        }else {
+                            county = null;
+                            Toast.makeText(WeatherActivity.this, "本软件暂时无法定位当前地区", Toast.LENGTH_SHORT).show();
                         }
-                            refreshLayout.setRefreshing(true);
-                            Toast.makeText(WeatherActivity.this, "正在定位当前城市", Toast.LENGTH_SHORT).show();
-                            LogUtil.d(TAG,"county:"+county);
+                        if(bdLocation.getDistrict().contains("市辖")){
+                            county = null;
+                            Toast.makeText(WeatherActivity.this, "本软件暂时无法定位当前地区", Toast.LENGTH_SHORT).show();
+                        }
+
+                        LogUtil.d(TAG,"county:"+county);
+                        if(county != null){
                             requestWeather(county);
-                            client.stop();
+                        }else {
+                            refreshLayout.setRefreshing(false);
+                        }
+                        client.stop();
                     }
                 });
                 client.start();
@@ -301,4 +315,25 @@ public class WeatherActivity extends AppCompatActivity {
         titlePosition = findViewById(R.id.title_position);
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        switch (keyCode){
+            case KeyEvent.KEYCODE_BACK:
+                if(event.getAction() == KeyEvent.ACTION_DOWN){
+                    //检查侧滑栏
+                    if(drawerLayout.isDrawerOpen(Gravity.START)){
+                        drawerLayout.closeDrawers();
+                    }else if((System.currentTimeMillis() - exitTime ) > 2000 ){
+                        //实现双击关闭页面
+                            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                            exitTime = System.currentTimeMillis();
+                    }else {
+                        finish();
+                    }
+                    return true;
+                }break;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }
